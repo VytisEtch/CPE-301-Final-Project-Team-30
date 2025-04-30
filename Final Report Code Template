@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 #include <Keypad.h>
-
+//code from lquid crystal 
  const int RS = 11, EN = 12, D4 = 2, D5 = 3, D6 = 4, D7 = 5;
  const int RC_NUM = 4;
  char keys[RC_NUM][RC_NUM] = {
@@ -33,6 +33,8 @@
    }
 
  }
+
+//code from echo
 
  #define RDA 0x80
  #define TBE 0x20  
