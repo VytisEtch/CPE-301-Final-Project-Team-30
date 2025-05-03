@@ -24,7 +24,5 @@ void loop() {
   } else if (backwardPressed == HIGH) {
     stepper.step(-25);
   }
-
-  delay(10);  // debounce delay
 }
 //this code will be modified further later 
