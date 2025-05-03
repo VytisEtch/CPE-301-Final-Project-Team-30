@@ -20,7 +20,7 @@ void loop() {
 
   if (forwardPressed == HIGH) {
     stepper.step(25);
-    Serial.println("fuck");
+    Serial.println("work");
   } else if (backwardPressed == HIGH) {
     stepper.step(-25);
   }
