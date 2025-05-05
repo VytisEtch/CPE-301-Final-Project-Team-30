@@ -8,7 +8,7 @@ LiquidCrystal lcd(RS, EN, D4, D5, D6, D7);
 //STEPPER MOTOR ==================================================
 #include <Stepper.h>
 const int stepsPerRevolution = 200;
-Stepper stepper(stepsPerRevolution, 21, 19, 20, 18);
+Stepper stepper(stepsPerRevolution, 16, 19, 17, 18);
 
 //BUTTONS/LED ====================================================
 
