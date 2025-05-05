@@ -52,6 +52,8 @@ volatile unsigned char* pin_a  = (unsigned char*) 0x20;
 int state = 1;
 float temp = 0.1;
 int voltage = 100;
+unsigned long previousMillis = 0; 
+const long interval = 100000;
 //================================================================
 
 void setup() 
@@ -60,12 +62,10 @@ void setup()
   U0init(9600);
   // setup the ADC
   adc_init();
-  
-  dht.begin();
 
+  dht.begin();
   lcd.begin(16, 2);   // Initialize the LCD (if you're using one)
   lcd.setCursor(0, 0);  // Set cursor to the first row
-
   stepper.setSpeed(100);
 
   //set PC(0-1, 5-7) to INPUT
@@ -83,6 +83,11 @@ void setup()
 
 void loop()
 {
+  //delay(1000);
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+  }else{
   //All States Except Disabled
   if(state == 2 || state == 3 || state == 4){
     //Monitor Stop Button (go to disabled state)
@@ -112,64 +117,65 @@ void loop()
       lcd.print("Temp: ");
       lcd.print(temp);
       lcd.print("C");
-    }
 
-    //Ventilation Changes (Stepper Motor)
-    if(!(*pin_c & (1 << PC1))){ //Left Button
-      stepper.step(25);
+      //Ventilation Changes (Stepper Motor)
+      if(!(*pin_c & (1 << PC1))){ //Left Button
+        stepper.step(25);
+        *port_b |= B00000100;
+        *port_b &= B00000100;
+      }else if(!(*pin_c & (1 << PC0))){ //Right Button
+        stepper.step(-25);
+        *port_b |= B00000010;
+        *port_b &= B00000010;
+      }
+    }
+  }
+    //int state = 1;  //(1)Disabled, (2)Idle, (3)Running, (4)Error
+    //State Logic
+    if(state == 1){ //Disabled
+      //TURN Yellow on
+      *port_b |= B00001000;
+      *port_b &= B00001000;
+      //Fan off
+      *port_a &= B00000000;
+      //Monitor Start Button
+      if(!(*pin_c & (1 << PC7))){
+        state = 2;
+      }
+    }
+    else if(state == 2){ //Idle
+      //TURN Green on
       *port_b |= B00000100;
       *port_b &= B00000100;
-    }else if(!(*pin_c & (1 << PC0))){ //Right Button
-      stepper.step(-25);
+
+      if(temp > temp_threshold){
+        state = 3;
+      }
+    }
+    else if(state == 3){ //Running
+      //TURN Blue on
       *port_b |= B00000010;
       *port_b &= B00000010;
+      //Fan on
+      *port_a |= B00000001;
+      
+      //Monitor Temp <= threshold
+      if(temp <= temp_threshold){
+        state = 2;
+      }
     }
-  }
-  //int state = 1;  //(1)Disabled, (2)Idle, (3)Running, (4)Error
-  //State Logic
-  if(state == 1){ //Disabled
-    //TURN Yellow on
-    *port_b |= B00001000;
-    *port_b &= B00001000;
-    //Fan off
-    *port_a &= B00000000;
-    //Monitor Start Button
-    if(!(*pin_c & (1 << PC7))){
-      state = 2;
-    }
-  }
-  else if(state == 2){ //Idle
-    //TURN Green on
-    *port_b |= B00000100;
-    *port_b &= B00000100;
+    else if(state == 4){ //Error
+      //TURN Red on
+      *port_b |= B00000001;
+      *port_b &= B00000001;
 
-    if(temp > temp_threshold){
-      state = 3;
-    }
-  }
-  else if(state == 3){ //Running
-    //TURN Blue on
-    *port_b |= B00000010;
-    *port_b &= B00000010;
-    //Fan on
-    *port_a |= B00000001;
-    
-    //Monitor Temp <= threshold
-    if(temp <= temp_threshold){
-      state = 2;
-    }
-  }
-  else if(state == 4){ //Error
-    //TURN Red on
-    *port_b |= B00000001;
-    *port_b &= B00000001;
+      //TURN FAN OFF
+      *port_a &= B00000000;
 
-    //TURN FAN OFF
-    *port_a &= B00000000;
-
-    //Monitor Reset Button & Water Level
-    if((!(*pin_c & (1 << PC5))) && (voltage > threshold_display)){ //only reset button rn
-      state = 2;
+      //Monitor Reset Button & Water Level
+      if((!(*pin_c & (1 << PC5))) && (voltage > threshold_display)){ //only reset button rn
+        state = 2;
+      }
     }
   }
 }
