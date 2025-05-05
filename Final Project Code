@@ -1,4 +1,4 @@
-//Vytis Etchegoyhen, David Kaio Tsuchiya, Artour, Tristan
+//Vytis Etchegoyhen, David Tsuchiya, Artur Volkau, Tristan Eaton 
 
 //LCD DISPLAY ====================================================
 #include <LiquidCrystal.h>
