@@ -39,7 +39,7 @@ volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
 //TEMP/HUMIDITY SENSOR ===========================================
 #include <DHT.h>
-#define DHTPIN 6 //whatever pin we have humidifier connected to ///////<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#define DHTPIN 6 
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 #define temp_threshold 25
@@ -83,7 +83,6 @@ void setup()
 
 void loop()
 {
-  //delay(1000);
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
